@@ -1,5 +1,14 @@
 local function OnLoad( mod )
     require "GENOCIDE_ROUTE:sals_undertale"
+    Content.AddStringTable("GENOCIDE_ROUTE", {
+        GENOCIDE_ROUTE =
+        {
+            SPEECH =
+            {
+                DODGE = "Like I would just stand there and take it!",
+            },
+        }
+    })
 end
 return {
     version = "0.0.1",
