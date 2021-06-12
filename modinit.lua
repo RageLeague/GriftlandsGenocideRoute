@@ -5,10 +5,20 @@ local function OnLoad( mod )
         {
             SPEECH =
             {
+                BOGUS_ARMOR = "Good thing I have Battle Oshnu armor!",
                 DODGE = "Like I would just stand there and take it!",
             },
         }
     })
+    local filepath = require "util/filepath"
+
+    for k, path in ipairs( filepath.list_files( "GENOCIDE_ROUTE:quips/", "*.yaml", true )) do
+        -- local name = path:match( "(.+)[.]yaml$" )
+        local db = QuipDatabase(  )
+        db:AddFilename(path)
+        Content.AddQuips(db)
+    end
+
 end
 return {
     version = "0.0.1",
