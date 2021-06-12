@@ -18,7 +18,10 @@ local function OnLoad( mod )
         db:AddFilename(path)
         Content.AddQuips(db)
     end
-
+    for k, path in ipairs( filepath.list_files( "GENOCIDE_ROUTE:quests/", "*.lua", true )) do
+        local name = path:match( "(.+)[.]lua$" )
+        require(name)
+    end
 end
 return {
     version = "0.0.1",

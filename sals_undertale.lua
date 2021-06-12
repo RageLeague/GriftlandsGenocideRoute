@@ -4,6 +4,8 @@ local CARD_FLAGS = battle_defs.CARD_FLAGS
 local negotiation_defs = require "negotiation/negotiation_defs"
 local EVENT = negotiation_defs.EVENT
 
+local COMBO_REQ = 8
+
 Content.AddCharacterDef
 (
     CharacterDef("SALS_UNDERTALE",
@@ -40,15 +42,15 @@ Content.AddCharacterDef
                             local options = {}
                             local attack_picker = self.owner.behaviour.attacks
                             if attack_picker then
-                                for card, weight in attack_picker.weighted_options do
+                                for card, weight in pairs(attack_picker.weighted_options) do
                                     if card:IsAttackCard() then
                                         table.insert(options, card)
                                     end
                                 end
                             end
                             local finisher_picker = self.owner.behaviour.finishers
-                            if finisher_picker and self.owner:GetConditionStacks("COMBO") >= 5 then
-                                for card, weight in finisher_picker.weighted_options do
+                            if finisher_picker and self.owner:GetConditionStacks("COMBO") >= COMBO_REQ then
+                                for card, weight in pairs(finisher_picker.weighted_options) do
                                     if card:IsAttackCard() then
                                         table.insert(options, card)
                                     end
@@ -158,7 +160,7 @@ Content.AddCharacterDef
                     self.fighter:AddCondition("sals_bogus_armor", 1)
 
                     self.fighter:AddCondition("npc_sal_nailed_glove")
-                    self.fighter:AddCondition("npc_sal_combo_pattern")
+                    -- self.fighter:AddCondition("npc_sal_combo_pattern")
 
                     self.fighter:AddCondition("sucker_punch", 1)
 
@@ -191,8 +193,8 @@ Content.AddCharacterDef
                         self:ChooseCard( self.deception )
                         return
                     end
-                    if self.fighter:GetConditionStacks("COMBO") >= 5 then
-                        self.attacks:ChooseCard()
+                    if self.fighter:GetConditionStacks("COMBO") >= COMBO_REQ then
+                        -- self.attacks:ChooseCard()
                         self.finishers:ChooseCard()
                     else
                         self.attacks:ChooseCards(2)
