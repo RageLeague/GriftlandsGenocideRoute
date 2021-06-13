@@ -1,5 +1,5 @@
 local function OnLoad( mod )
-    require "GENOCIDE_ROUTE:sals_undertale"
+
     Content.AddStringTable("GENOCIDE_ROUTE", {
         GENOCIDE_ROUTE =
         {
@@ -28,6 +28,10 @@ local function OnLoad( mod )
         Content.AddQuips(db)
     end
     for k, path in ipairs( filepath.list_files( "GENOCIDE_ROUTE:quests/", "*.lua", true )) do
+        local name = path:match( "(.+)[.]lua$" )
+        require(name)
+    end
+    for k, path in ipairs( filepath.list_files( "GENOCIDE_ROUTE:characters/", "*.lua", true )) do
         local name = path:match( "(.+)[.]lua$" )
         require(name)
     end
