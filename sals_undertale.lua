@@ -23,6 +23,8 @@ Content.AddCharacterDef
             MAX_HEALTH = 65,
             MAX_MORALE = MAX_MORALE_LOOKUP.MEDIUM,
 
+            always_false_surrender = true,
+
             attacks =
             {
                 sals_deception =
@@ -38,7 +40,7 @@ Content.AddCharacterDef
 
                         local selected_card
 
-                        if self.init_surprise then
+                        if not self.scripted_improv then
                             local options = {}
                             local attack_picker = self.owner.behaviour.attacks
                             if attack_picker then
@@ -60,8 +62,17 @@ Content.AddCharacterDef
                                 selected_card = table.arraypick(options)
                             end
                         else
-                            selected_card = self.owner.behaviour.blademouth_beating
-                            self.init_surprise = true
+                            if self.scripted_improv == "INIT_SURPRISE" then
+                                selected_card = self.owner.behaviour.blademouth_beating
+                            elseif self.scripted_improv == "FALSE_SURRENDER" then
+                                selected_card = self.owner.behaviour.blademouth_beating
+                                if (self.owner.false_surrender_count or 0) == 1 then
+                                    if battle:GetPlayerFighter() then
+                                        battle:GetPlayerFighter():SaySpeech(1, LOC"GENOCIDE_ROUTE.SPEECH.FALSE_SURRENDER_RALLY_1_RESPONSE")
+                                    end
+                                end
+                            end
+                            self.scripted_improv = nil
                         end
                         if selected_card then
                             selected_card.deception_bonus = 4
@@ -150,14 +161,34 @@ Content.AddCharacterDef
                         end,
                     },
                 },
+                -- Just a marker to indicate there is a false surrender for her.
+                sals_false_surrender_trigger =
+                {
+                    hidden = true,
+                    event_handlers =
+                    {
+                        [ BATTLE_EVENT.FIGHTER_SURRENDER ] = function( self, fighter )
+                            if fighter == self.owner then
+                                -- self.owner:SaySpeech(1, LOC"GENOCIDE_ROUTE.SPEECH.FALSE_SURRENDER")
+                            end
+                        end,
+                    },
+                },
             },
 
             behaviour = {
+                OnFalseSurrender = function(self, fighter)
+                    fighter.false_surrender_count = (fighter.false_surrender_count or 0) + 1
+                    self:SetPattern(self.FalseSurrenderDeception)
+                    fighter:Rally()
+
+                end,
                 OnActivate = function( self, fighter )
                     self.fighter.stat_bounds[ COMBAT_STAT.HEALTH ].min = 1 -- cannot be killed
 
                     self.fighter:AddCondition("sals_dodge_attacks", 1)
                     self.fighter:AddCondition("sals_bogus_armor", 1)
+                    self.fighter:AddCondition("sals_false_surrender_trigger", 1)
 
                     self.fighter:AddCondition("npc_sal_nailed_glove")
                     -- self.fighter:AddCondition("npc_sal_combo_pattern")
@@ -183,6 +214,7 @@ Content.AddCharacterDef
 
                 FirstAttack = function( self )
                     self:ChooseCard( self.inside_fighting )
+                    self.deception.scripted_improv = "INIT_SURPRISE"
                     self:ChooseCard( self.deception )
 
                     self:SetPattern( self.NormalPattern )
@@ -199,6 +231,13 @@ Content.AddCharacterDef
                     else
                         self.attacks:ChooseCards(2)
                     end
+                end,
+
+                FalseSurrenderDeception = function(self)
+                    self.deception.scripted_improv = "FALSE_SURRENDER"
+                    self:ChooseCard( self.deception )
+
+                    self:SetPattern( self.NormalPattern )
                 end,
             },
         },

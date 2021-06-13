@@ -7,10 +7,18 @@ local function OnLoad( mod )
             {
                 BOGUS_ARMOR = "Good thing I have Battle Oshnu armor!",
                 DODGE = "Like I would just stand there and take it!",
+                -- FALSE_SURRENDER = "You've got me.",
+                -- FALSE_SURRENDER_RALLY_1 = "You let your guard down!",
+                FALSE_SURRENDER_RALLY_1_RESPONSE = "What? False surrendering is a war crime!",
             },
         }
     })
     local filepath = require "util/filepath"
+
+    for k, path in ipairs( filepath.list_files( "GENOCIDE_ROUTE:patches/", "*.lua", true )) do
+        local name = path:match( "(.+)[.]lua$" )
+        require(name)
+    end
 
     for k, path in ipairs( filepath.list_files( "GENOCIDE_ROUTE:quips/", "*.yaml", true )) do
         -- local name = path:match( "(.+)[.]yaml$" )

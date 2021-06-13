@@ -3,3 +3,10 @@ lines:
 - tags: [battle_join, sals_undertale]
   dialog:
   - This is for all the people you've killed!
+- tags: [battle_rally, sals_undertale]
+  dialog:
+  - You let your guard down!
+- tags: [battle_surrender, sals_undertale]
+  dialog:
+  - You've got me.
+  - I'm all out of tricks.
