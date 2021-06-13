@@ -101,7 +101,7 @@ Content.AddCharacterDef
                     name = "Blademouth Beating",
                     anim = "uppercut",
                     flags = CARD_FLAGS.MELEE | CARD_FLAGS.DEBUFF,
-                    damage_mult = 0.5,
+                    damage_mult = 0.3,
 
                     bleed_feature = "BLEED",
                     bleed_count = 2,
@@ -192,6 +192,40 @@ Content.AddCharacterDef
                                 print("Triggered death defiance")
                                 acc:ModifyValue(false, self)
                                 self.battle:BroadcastEvent( BATTLE_EVENT.ON_DODGE, killed, nil, killer )
+                                if self.battle:HasExecutes() then
+                                    -- Move on to the next phase
+                                    self.owner.behaviour_phase = (self.owner.behaviour_phase or 0) + 1
+                                    local screen = TheGame:FE():FindScreen( "Screen.FightScreen" )
+                                    if screen then screen.end_turn = true end
+                                    self.battle:ResumeFromExecution()
+                                    self.owner:SaySpeech(1, LOC"GENOCIDE_ROUTE.SPEECH.FIRST_PHASE_DONE")
+
+                                    self.owner:AddCondition("sals_custom_rally_logic", 1)
+                                    -- self.owner.mute = false
+
+                                    if self.owner.behaviour and self.owner.behaviour.SecondPhaseInit then
+                                        self.owner.behaviour:SetPattern(self.owner.behaviour.SecondPhaseInit)
+                                    end
+                                end
+                            end
+                        end,
+                    },
+                },
+                sals_custom_rally_logic =
+                {
+                    hidden = true,
+                    event_handlers =
+                    {
+                        [ BATTLE_EVENT.BEGIN_TURN ] = function( self, fighter )
+                            if fighter == self.owner then
+                                fighter.mute = true
+                                fighter:Rally()
+                            end
+                        end,
+                        [ EVENT.END_TURN ] = function( self, fighter )
+                            if fighter == self.owner then
+                                fighter.mute = false
+                                self.owner:RemoveCondition(self.id, 1, self)
                             end
                         end,
                     },
@@ -244,7 +278,7 @@ Content.AddCharacterDef
                 end,
 
                 NormalPattern = function( self )
-                    if math.random() < 0.33 then
+                    if math.random() < 0.3 then
                         self:ChooseCard( self.deception )
                         return
                     end
@@ -261,6 +295,9 @@ Content.AddCharacterDef
                     self:ChooseCard( self.deception )
 
                     self:SetPattern( self.NormalPattern )
+                end,
+
+                SecondPhaseInit = function(self)
                 end,
             },
         },

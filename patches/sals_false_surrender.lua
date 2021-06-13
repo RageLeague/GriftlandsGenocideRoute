@@ -13,8 +13,7 @@ function FightScreen:AcceptSurrender(...)
         -- return old_accept_surrender_fn(self, ...)
         AUDIO:PlayEvent(SoundEvents.battle_accept_surrender)
         self.end_turn = true
-        self.accept_surrender_button:AnimateOut()
-        self.end_turn_btn:AnimateIn()
+
         self.battle:ResumeFromExecution()
         for i, fighter in battle:GetEnemyTeam():Fighters() do
             if fighter.behaviour and fighter.behaviour.OnFalseSurrender then
@@ -48,6 +47,11 @@ end
 
 function BattleEngine:ResumeFromExecution()
     if self.added_executes then
+        local screen = TheGame:FE():FindScreen( "Screen.FightScreen" )
+        if screen then
+            screen.accept_surrender_button:AnimateOut()
+            screen.end_turn_btn:AnimateIn()
+        end
         self.hand_deck:TransferCards( self.trash_deck )
         self.draw_deck:TransferCards( self.trash_deck )
         self.discard_deck:TransferCards( self.trash_deck )

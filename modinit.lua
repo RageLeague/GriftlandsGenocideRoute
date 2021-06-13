@@ -10,6 +10,7 @@ local function OnLoad( mod )
                 -- FALSE_SURRENDER = "You've got me.",
                 -- FALSE_SURRENDER_RALLY_1 = "You let your guard down!",
                 FALSE_SURRENDER_RALLY_1_RESPONSE = "What? False surrendering is a war crime!",
+                FIRST_PHASE_DONE = "There is no end to your bloodlust, is there?",
             },
         }
     })
