@@ -1,5 +1,7 @@
 local battle_defs = require "battle/battle_defs"
-local BATTLE_EVENT = battle_defs.BATTLE_EVENT
+local BATTLE_EVENT = ExtendEnum(battle_defs.BATTLE_EVENT, {
+    "CALC_FIGHTER_KILL",
+})
 local CARD_FLAGS = battle_defs.CARD_FLAGS
 local negotiation_defs = require "negotiation/negotiation_defs"
 local EVENT = negotiation_defs.EVENT
@@ -174,6 +176,26 @@ Content.AddCharacterDef
                         end,
                     },
                 },
+                sals_death_defiance =
+                {
+                    hidden = true,
+                    event_handlers =
+                    {
+                        [ BATTLE_EVENT.CALC_FIGHTER_KILL ] = function( self, acc, killed, killer )
+                            print("Check death defiance")
+                            print(self)
+                            print(acc)
+                            print(killed)
+                            print(killer)
+                            if killed == self.owner and killed:GetStat( COMBAT_STAT.HEALTH ) > 0 then
+                                -- self.owner:SaySpeech(1, LOC"GENOCIDE_ROUTE.SPEECH.FALSE_SURRENDER")
+                                print("Triggered death defiance")
+                                acc:ModifyValue(false, self)
+                                self.battle:BroadcastEvent( BATTLE_EVENT.ON_DODGE, killed, nil, killer )
+                            end
+                        end,
+                    },
+                },
             },
 
             behaviour = {
@@ -189,6 +211,7 @@ Content.AddCharacterDef
                     self.fighter:AddCondition("sals_dodge_attacks", 1)
                     self.fighter:AddCondition("sals_bogus_armor", 1)
                     self.fighter:AddCondition("sals_false_surrender_trigger", 1)
+                    self.fighter:AddCondition("sals_death_defiance", 1)
 
                     self.fighter:AddCondition("npc_sal_nailed_glove")
                     -- self.fighter:AddCondition("npc_sal_combo_pattern")
