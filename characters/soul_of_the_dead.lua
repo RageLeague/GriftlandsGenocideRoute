@@ -6,6 +6,33 @@ local CARD_FLAGS = battle_defs.CARD_FLAGS
 local negotiation_defs = require "negotiation/negotiation_defs"
 local EVENT = negotiation_defs.EVENT
 
+local DEAD_FLASH_VALUES =
+{
+    colour = 0xeeffffff,
+    time_in = 0.1,
+    time_out = 0.3,
+    max_intensity = 1
+}
+
+local DEAD_HOLOGRAM_VALUES =
+{
+     scale = -1.0,
+   -- colour = 0x9900ffff,
+    colour = 0xc2d3d2ff,
+    alpha = {0.7, 0.3, 2.0}, -- Alpha for each layer of the FX
+    speed = {0.05, 0.07, 0.5},
+    layersTexture = engine.asset.Texture("rgba/character_hover.tex"),
+
+    glitchSpeed = 0.07,
+    glitchScale = 6.0,
+    glitchTexture = engine.asset.Texture("glitch/holo_glitch.tex"),
+
+    colormatrixHue = {1.0,1.2,1.2},
+    colormatrixSaturation = 0.0,
+    colormatrixBrightness = 0.0,
+    colormatrixContrast = 1.5,
+}
+
 Content.AddCharacterDef
 (
     CharacterDef("SOUL_OF_THE_DEAD",
@@ -68,6 +95,18 @@ Content.AddCharacterDef
         {
             MAX_HEALTH = 25,
             MAX_MORALE = MAX_MORALE_LOOKUP.IMMUNE,
+
+            OnJoinBattle = function( fighter, anim_fighter )
+                local x, y = anim_fighter.sim:GetCamera():WorldToScreen( anim_fighter:GetStatusWidgetPosition() )
+                local width = TheGame:FE():GetScreenDims()
+                local screen_pos = math.abs(x)/width
+                local pan_pos = easing.linear( screen_pos, -1, 2, 1 )
+                AUDIO:PlayParamEvent("event:/sfx/battle/atk_anim/kashio/hologram_on", "position", pan_pos)
+                anim_fighter:Flash(DEAD_FLASH_VALUES.colour, DEAD_FLASH_VALUES.time_in, DEAD_FLASH_VALUES.time_out, DEAD_FLASH_VALUES.max_intensity)
+                anim_fighter:SetHologramEffect(true, DEAD_HOLOGRAM_VALUES)
+                local x, z = anim_fighter:GetHomePosition()
+                anim_fighter:SetPos( x, z )
+            end,
 
             conditions =
             {

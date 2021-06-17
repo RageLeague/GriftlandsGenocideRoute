@@ -8,6 +8,16 @@ local EVENT = negotiation_defs.EVENT
 
 local COMBO_REQ = 5
 
+local function CollectDeadAgents()
+    local dead_agents = {}
+    for k, agent in pairs( TheGame:GetGameState().removed_agents or {} ) do
+        if agent:IsSentient() and agent:IsDead() then
+            table.insert_unique( dead_agents, agent )
+        end
+    end
+    return dead_agents
+end
+
 Content.AddCharacterDef
 (
     CharacterDef("SALS_UNDERTALE",
