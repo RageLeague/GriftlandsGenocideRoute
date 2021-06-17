@@ -6,7 +6,7 @@ local CARD_FLAGS = battle_defs.CARD_FLAGS
 local negotiation_defs = require "negotiation/negotiation_defs"
 local EVENT = negotiation_defs.EVENT
 
-local COMBO_REQ = 8
+local COMBO_REQ = 5
 
 Content.AddCharacterDef
 (
