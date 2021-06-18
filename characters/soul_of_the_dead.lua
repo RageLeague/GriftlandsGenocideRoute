@@ -105,6 +105,11 @@ Content.AddCharacterDef
                 anim_fighter:Flash(DEAD_FLASH_VALUES.colour, DEAD_FLASH_VALUES.time_in, DEAD_FLASH_VALUES.time_out, DEAD_FLASH_VALUES.max_intensity)
                 anim_fighter:SetHologramEffect(true, DEAD_HOLOGRAM_VALUES)
                 local x, z = anim_fighter:GetHomePosition()
+                if anim_fighter.team == TEAM.BLUE then
+                    x = x - FIGHT_MAX_DIST
+                else
+                    x = x + FIGHT_MAX_DIST
+                end
                 anim_fighter:SetPos( x, z )
             end,
 
@@ -129,7 +134,8 @@ Content.AddCharacterDef
 
                     event_handlers = {
                         [ BATTLE_EVENT.CALC_DAMAGE ] = function( self, card, target, dmgt )
-                            if card.owner == self.owner and target:GetAgent() and target:GetAgent():GetContentID() == "SOUL_OF_THE_DEAD" then
+                            if card.owner == self.owner and target and target:GetAgent() and
+                                target:GetAgent():GetContentID() == "SOUL_OF_THE_DEAD" then
                                 dmgt:ModifyDamage( math.round( dmgt.min_damage * self.damage_mult ),
                                                 math.round( dmgt.max_damage * self.damage_mult ),
                                                 self )
@@ -199,7 +205,7 @@ Content.AddCharacterDef
                                     if source.target:IsPlayer() then
                                         table.insert(debuff_list, "annihilation")
                                     end
-                                    source.target:AddCondition(table.arraypick(self.debuff_list), self.stacks, self)
+                                    source.target:AddCondition(table.arraypick(debuff_list), self.stacks, self)
                                 end
                                 return 0
                             end

@@ -111,7 +111,8 @@ Content.AddCharacterDef
                     name = "Blademouth Beating",
                     anim = "uppercut",
                     flags = CARD_FLAGS.MELEE | CARD_FLAGS.DEBUFF,
-                    damage_mult = 0.3,
+
+                    base_damage = 2,
 
                     bleed_feature = "BLEED",
                     bleed_count = 2,
@@ -133,6 +134,27 @@ Content.AddCharacterDef
                         self.hit_anim = false
                     end,
                 },
+                sals_summon_dead =
+                {
+                    name = "Summon Restless Souls",
+                    anim = "call_in",
+                    flags = CARD_FLAGS.SKILL | CARD_FLAGS.BUFF,
+                    target_type = TARGET_TYPE.SELF,
+
+                    OnPostResolve = function(self, battle, attack)
+                        local dead_people = CollectDeadAgents()
+                        table.shuffle(dead_people)
+                        for i = 1, 15 do
+                            local agent = dead_people[i]
+                            local new_agent = Agent("SOUL_OF_THE_DEAD")
+                            if agent then
+                                new_agent:AssignDeadChar(agent)
+                            end
+                            self.owner:GetTeam():AddFighter( Fighter.CreateFromAgent( new_agent, self.owner:GetScale() ) )
+                        end
+                        self.owner:AddCondition("DAUNTLESS", 1)
+                    end,
+                },
             },
 
             conditions =
@@ -151,7 +173,7 @@ Content.AddCharacterDef
                                     end
                                     self.owner:SaySpeech(1, LOC"GENOCIDE_ROUTE.SPEECH.DODGE")
                                     self.owner:RemoveCondition(self.id, 1, self)
-                                    self.owner:AddCondition("EVASION", 30, self)
+                                    self.owner:AddCondition("EVASION", 20 + 5 * (GetAdvancementModifier( ADVANCEMENT_OPTION.NPC_BOSS_DIFFICULTY ) or 1), self)
                                 end
 
                             end
@@ -212,9 +234,10 @@ Content.AddCharacterDef
 
                                     self.owner:AddCondition("sals_custom_rally_logic", 1)
                                     -- self.owner.mute = false
-
-                                    if self.owner.behaviour and self.owner.behaviour.SecondPhaseInit then
-                                        self.owner.behaviour:SetPattern(self.owner.behaviour.SecondPhaseInit)
+                                    if self.owner.behaviour_phase == 1 then
+                                        if self.owner.behaviour and self.owner.behaviour.SecondPhaseInit then
+                                            self.owner.behaviour:SetPattern(self.owner.behaviour.SecondPhaseInit)
+                                        end
                                     end
                                 end
                             end
@@ -228,14 +251,56 @@ Content.AddCharacterDef
                     {
                         [ BATTLE_EVENT.BEGIN_TURN ] = function( self, fighter )
                             if fighter == self.owner then
-                                fighter.mute = true
+                                fighter.rally_modifier = "sals_determination"
                                 fighter:Rally()
                             end
                         end,
                         [ EVENT.END_TURN ] = function( self, fighter )
                             if fighter == self.owner then
-                                fighter.mute = false
+                                fighter.rally_modifier = "RALLIED"
                                 self.owner:RemoveCondition(self.id, 1, self)
+                            end
+                        end,
+                    },
+                },
+                sals_determination =
+                {
+                    name = "Determination",
+                    desc = "Deals 25% more damage.\n\nWhen damaged, gain a stack, then gain composure equal to the number of stacks.",
+                    ctype = CTYPE.BUFF,
+
+                    apply_sound = SoundEvents.battle_status_rallied,
+
+                    OnApply = function( self, battle )
+                        local HEAL_PERCENT = 1
+                        local MIN_HEAL = 5
+
+                        local min, max = self.owner:GetStatBounds( COMBAT_STAT.HEALTH )
+                        local current_health = self.owner:GetHealth()
+
+                        self.owner:DeltaHealth( math.max( MIN_HEAL, max * HEAL_PERCENT ) )
+                    end,
+
+                    event_handlers =
+                    {
+                        [ BATTLE_EVENT.CALC_DAMAGE ] = function( self, card, target, dmgt )
+                            if card.owner == self.owner then
+                                dmgt:ModifyDamage( math.round( dmgt.min_damage * 1.25 ),
+                                                math.round( dmgt.max_damage * 1.25 ),
+                                                self )
+                            end
+                        end,
+
+                        [ BATTLE_EVENT.CONDITION_ADDED ] = function( self, fighter, condition, stacks, source )
+                            if condition:GetID() == "SURRENDER" and fighter == self.owner then
+                                self.owner:RemoveCondition(self.id)
+                            end
+                        end,
+
+                        [ BATTLE_EVENT.DELTA_STAT ] = function( self, fighter, stat, delta, value, mitigated  )
+                            if fighter == self.owner and stat == COMBAT_STAT.HEALTH and delta < 0 then
+                                self.owner:AddCondition(self.id, 1, self)
+                                self.owner:AddCondition("DEFEND", self.stacks or 1, self)
                             end
                         end,
                     },
@@ -251,6 +316,7 @@ Content.AddCharacterDef
                 end,
                 OnActivate = function( self, fighter )
                     self.fighter.stat_bounds[ COMBAT_STAT.HEALTH ].min = 1 -- cannot be killed
+                    fighter.mute = true
 
                     self.fighter:AddCondition("sals_dodge_attacks", 1)
                     self.fighter:AddCondition("sals_bogus_armor", 1)
@@ -275,6 +341,8 @@ Content.AddCharacterDef
                     -- This is for the initial set up turn
                     self.deception = self:AddCard( "sals_deception" )
                     self.inside_fighting = self:AddCard( "sals_inside_fighting" )
+
+                    self.summon_dead = self:AddCard( "sals_summon_dead" )
 
                     self:SetPattern( self.FirstAttack )
                 end,
@@ -308,6 +376,9 @@ Content.AddCharacterDef
                 end,
 
                 SecondPhaseInit = function(self)
+                    self:ChooseCard( self.summon_dead )
+
+                    self:SetPattern( self.NormalPattern )
                 end,
             },
         },
