@@ -30,6 +30,15 @@ Content.AddCharacterDef
 
         bio = "If you see Sals Undertale and she looks at your general direction, it is already too late. Just restart the run.",
 
+        combat_strength = 5,
+
+        boss = true,
+
+        battle_preview_anim = "anim/hero_sal_outfit1_slide.zip",
+        battle_preview_offset = { x = -320, y = -25, scale = 1 },
+        battle_preview_glow = { colour = 0x11FFFEFF, bloom = 0.35, threshold = 0.02 },
+        battle_preview_audio = "event:/ui/prebattle_overlay/prebattle_overlay_whooshin_boss_assassin_hanbi",
+
         fight_data =
         {
             MAX_HEALTH = 65,
