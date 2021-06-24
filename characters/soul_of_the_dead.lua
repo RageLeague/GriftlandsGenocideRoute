@@ -154,7 +154,8 @@ Content.AddCharacterDef
                 {
                     name = "Ghostly Form",
                     desc = "If {1}'s attack would cause health loss, prevent that much damage and apply {2} stacks " ..
-                        "of debuff chosen from {survivors_guilt}, {dread}, and {annihilation} at the end of {1}'s turn.",
+                        "of debuff chosen from {survivors_guilt}, {dread}, and {annihilation} at the end of {1}'s turn.\n\n" ..
+                        "When {1} is killed, each opponent gains debuff chosen from one of the above.",
                     desc_fn = function(self, fmt_str)
                         return loc.format(fmt_str, self:GetOwnerName(), self.stacks or 1)
                     end,
@@ -181,6 +182,17 @@ Content.AddCharacterDef
                                     for i,hit in attack:Hits() do
                                         hit.target:RemoveCondition("ghostly_form_trigger", nil, self)
                                     end
+                                end
+                            end
+                        end,
+                        [ BATTLE_EVENT.STATUS_CHANGED ] = function( self, fighter, status )
+                            if fighter == self.owner and status == FIGHT_STATUS.DEAD then
+                                for _, other_fighter in pairs( fighter:GetEnemyTeam().fighters ) do
+                                    local debuff_list = {"survivors_guilt", "dread"}
+                                    if other_fighter:IsPlayer() then
+                                        table.insert(debuff_list, "annihilation")
+                                    end
+                                    other_fighter:AddCondition(table.arraypick(debuff_list), self.stacks, self)
                                 end
                             end
                         end,
@@ -232,7 +244,7 @@ Content.AddCharacterDef
                     target_type = TARGET_TYPE.SELF,
                     flags = CARD_FLAGS.SKILL | CARD_FLAGS.BUFF,
 
-                    defend = { 5, 7, 9, 11, 13 },
+                    defend = { 6, 9, 12, 15, 18 },
 
                     CanPlayCard = function(self, battle, target )
                         for i, fighter in self.owner.team:Fighters() do
@@ -251,30 +263,30 @@ Content.AddCharacterDef
                 ghostly_restoration = table.extend(NPC_BUFF)
                 {
                     name = "Ghostly Restoration",
-			        anim = "taunt",
-			        flags = CARD_FLAGS.SKILL | CARD_FLAGS.BUFF | CARD_FLAGS.HEAL,
+                    anim = "taunt",
+                    flags = CARD_FLAGS.SKILL | CARD_FLAGS.BUFF | CARD_FLAGS.HEAL,
 
                     target_type = TARGET_TYPE.FRIENDLY_OR_SELF,
-			        target_mod = TARGET_MOD.TEAM,
+                    target_mod = TARGET_MOD.TEAM,
 
                     OnPostResolve = function(self, battle, attack)
-			            for i,hit in ipairs(attack.hits) do
-			        		hit.target:HealHealth( 4, self )
-			        	end
-			        end,
+                        for i,hit in ipairs(attack.hits) do
+                            hit.target:HealHealth( 8, self )
+                        end
+                    end,
                 },
                 ghostly_protection = table.extend(NPC_BUFF)
                 {
                     name = "Ghostly Protection",
-			        anim = "taunt",
-			        flags = CARD_FLAGS.SKILL | CARD_FLAGS.BUFF,
+                    anim = "taunt",
+                    flags = CARD_FLAGS.SKILL | CARD_FLAGS.BUFF,
 
                     target_type = TARGET_TYPE.FRIENDLY_OR_SELF,
-			        target_mod = TARGET_MOD.TEAM,
+                    target_mod = TARGET_MOD.TEAM,
 
                     features =
                     {
-                        DEFEND = 5,
+                        DEFEND = 8,
                     },
                 },
             },

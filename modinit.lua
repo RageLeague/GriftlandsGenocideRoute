@@ -12,6 +12,7 @@ local function OnLoad( mod )
                 FALSE_SURRENDER_RALLY_1_RESPONSE = "What? False surrendering is a war crime!",
                 FIRST_PHASE_DONE = "There is no end to your bloodlust, is there?",
                 SALS_DEFEATED = "No!",
+                SUMMON_DEAD = "Remember them?",
             },
         }
     })
@@ -44,5 +45,5 @@ return {
     OnLoad = OnLoad,
 
     title = "Genocide Route",
-    desc = "If you kill too much people in Griftlands, you will have to fight the hardest boss in the game, Sals Undertale.",
+    description = "If you kill too much people in Griftlands, you will have to fight the hardest boss in the game, Sals Undertale.",
 }

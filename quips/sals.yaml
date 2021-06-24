@@ -1,12 +1,7 @@
 
 lines:
-- tags: [battle_join, sals_undertale]
+- tags: [battle_join, soul_of_the_dead]
   dialog:
-  - This is for all the people you've killed!
-- tags: [battle_rally, sals_undertale]
-  dialog:
-  - You let your guard down!
-- tags: [battle_surrender, sals_undertale]
-  dialog:
-  - You've got me.
-  - I'm all out of tricks.
+  - You've done this to me!
+  - This is your fault!
+
