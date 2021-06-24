@@ -35,7 +35,7 @@ Content.AddCharacterDef
         boss = true,
 
         battle_preview_anim = "anim/hero_sal_outfit1_slide.zip",
-        battle_preview_offset = { x = -320, y = -25, scale = 1 },
+        battle_preview_offset = { x = -1024, y = -25, scale = 1 },
         battle_preview_glow = { colour = 0x11FFFEFF, bloom = 0.35, threshold = 0.02 },
         battle_preview_audio = "event:/ui/prebattle_overlay/prebattle_overlay_whooshin_boss_assassin_hanbi",
 
@@ -121,7 +121,7 @@ Content.AddCharacterDef
                     anim = "uppercut",
                     flags = CARD_FLAGS.MELEE | CARD_FLAGS.DEBUFF,
 
-                    base_damage = 2,
+                    base_damage = 3,
 
                     bleed_feature = "BLEED",
                     bleed_count = 2,
@@ -231,6 +231,10 @@ Content.AddCharacterDef
                             if killed == self.owner and killed:GetStat( COMBAT_STAT.HEALTH ) > 0 then
                                 -- self.owner:SaySpeech(1, LOC"GENOCIDE_ROUTE.SPEECH.FALSE_SURRENDER")
                                 print("Triggered death defiance")
+                                if self.battle:HasExecutes() and (self.owner.behaviour_phase or 0) >= 1 then
+                                    self.owner:SaySpeech(1, LOC"GENOCIDE_ROUTE.SPEECH.SALS_DEFEATED")
+                                    return
+                                end
                                 acc:ModifyValue(false, self)
                                 self.battle:BroadcastEvent( BATTLE_EVENT.ON_DODGE, killed, nil, killer )
                                 if self.battle:HasExecutes() then

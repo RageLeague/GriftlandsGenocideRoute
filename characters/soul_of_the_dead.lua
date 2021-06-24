@@ -223,7 +223,7 @@ Content.AddCharacterDef
                     name = "Ghostly Attack",
                     anim = "throw",
 
-                    damage_mult = 0.5,
+                    damage_mult = 0.7,
                 },
                 selfless_protection = table.extend(NPC_BUFF)
                 {
@@ -232,7 +232,7 @@ Content.AddCharacterDef
                     target_type = TARGET_TYPE.SELF,
                     flags = CARD_FLAGS.SKILL | CARD_FLAGS.BUFF,
 
-                    defend = { 3, 4, 5, 6, 7 },
+                    defend = { 5, 7, 9, 11, 13 },
 
                     CanPlayCard = function(self, battle, target )
                         for i, fighter in self.owner.team:Fighters() do
@@ -248,6 +248,35 @@ Content.AddCharacterDef
                         self.owner:AddCondition( "DEFEND", self:ScaleBuff( self.defend ))
                     end,
                 },
+                ghostly_restoration = table.extend(NPC_BUFF)
+                {
+                    name = "Ghostly Restoration",
+			        anim = "taunt",
+			        flags = CARD_FLAGS.SKILL | CARD_FLAGS.BUFF | CARD_FLAGS.HEAL,
+
+                    target_type = TARGET_TYPE.FRIENDLY_OR_SELF,
+			        target_mod = TARGET_MOD.TEAM,
+
+                    OnPostResolve = function(self, battle, attack)
+			            for i,hit in ipairs(attack.hits) do
+			        		hit.target:HealHealth( 4, self )
+			        	end
+			        end,
+                },
+                ghostly_protection = table.extend(NPC_BUFF)
+                {
+                    name = "Ghostly Protection",
+			        anim = "taunt",
+			        flags = CARD_FLAGS.SKILL | CARD_FLAGS.BUFF,
+
+                    target_type = TARGET_TYPE.FRIENDLY_OR_SELF,
+			        target_mod = TARGET_MOD.TEAM,
+
+                    features =
+                    {
+                        DEFEND = 5,
+                    },
+                },
             },
 
             behaviour =
@@ -258,7 +287,8 @@ Content.AddCharacterDef
 
                     self.buff_cards = self:MakePicker()
                         :AddID( "selfless_protection", 1 )
-                        :AddID( "ai_defend_med", 1 )
+                        :AddID( "ghostly_protection", 1 )
+                        :AddID( "ghostly_restoration", 1 )
 
                     self.attack_cards = self:MakePicker()
                         :AddID( "ghostly_attack", 1 )
