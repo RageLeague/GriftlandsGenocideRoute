@@ -314,6 +314,7 @@ Content.AddCharacterDef
                     desc = "Deals 25% more damage.\n\nWhen damaged, gain a stack, then gain {DEFEND} equal to the number of stacks.\n\n" ..
                         "Gain {DEFEND} equal to the number of stacks at the end of turn.",
                     ctype = CTYPE.BUFF,
+                    icon = "battle/conditions/rallied.tex",
 
                     apply_sound = SoundEvents.battle_status_rallied,
 
