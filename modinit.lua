@@ -39,7 +39,7 @@ local function OnLoad( mod )
     end
 end
 return {
-    version = "0.0.1",
+    version = "0.0.2",
     alias = "GENOCIDE_ROUTE",
 
     OnLoad = OnLoad,
