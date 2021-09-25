@@ -114,8 +114,11 @@ QDEF:AddConvo()
             ]],
         }
         :Fn(function(cxt)
-            TheGame:GetGameState():RequireMod(Content.FindMod(cxt.mod_id))
-            DoAutoSave()
+            local game_state = TheGame:GetGameState()
+            if not table.findif( game_state.options.required_mods, function(data) return data.id == cxt.mod_id end ) then
+                TheGame:GetGameState():RequireMod(Content.FindMod(cxt.mod_id))
+                DoAutoSave()
+            end
             if (cxt.quest.param.dialog_count or 0) == 0 then
                 cxt:Dialog("DIALOG_INTRO")
             else
